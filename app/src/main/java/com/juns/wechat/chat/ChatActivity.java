@@ -23,7 +23,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -188,19 +187,14 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
-		initView();
-		setUpView();
-		setListener();
+//		initView();
+//		setUpView();
+//		setListener();
+
+
+
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			Utils.finish(this);
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
 
 	/**
 	 * initView
@@ -315,14 +309,27 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
 				.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "demo");
 		// 判断单聊还是群聊
-		chatType = getIntent().getIntExtra(Constants.TYPE, CHATTYPE_SINGLE);
-		Name = getIntent().getStringExtra(Constants.NAME);
+//		chatType = getIntent().getIntExtra(Constants.TYPE, CHATTYPE_SINGLE);
+//		Name = getIntent().getStringExtra(Constants.NAME);
+		if (getIntent() != null){
+			Bundle extras = getIntent().getExtras();
+			if (extras != null){
+				if (extras.containsKey(Constants.NAME))
+					Name = extras.getString(Constants.NAME);
+
+				if (extras.containsKey(Constants.TYPE)){
+					chatType = extras.getInt(Constants.TYPE);
+				}
+			}
+
+
+		}
+
 		img_right.setVisibility(View.VISIBLE);
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
-			toChatUsername = getIntent().getStringExtra(Constants.User_ID);
 			img_right.setImageResource(R.drawable.icon_chat_user);
 			if (TextUtils.isEmpty(Name)) {
-				initUserInfo();
+				//initUserInfo();
 			} else {
 				txt_title.setText(Name);
 			}
@@ -1527,7 +1534,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		adapter.refresh();
+//		adapter.refresh();
 	}
 
 	@Override
@@ -1600,7 +1607,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			iv_emoticons_normal.setVisibility(View.VISIBLE);
 			iv_emoticons_checked.setVisibility(View.INVISIBLE);
 		} else {
-			super.onBackPressed();
+			Utils.finish(this);
 		}
 	}
 

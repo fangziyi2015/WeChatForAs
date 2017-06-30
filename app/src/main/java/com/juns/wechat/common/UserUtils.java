@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.hyphenate.chat.EMClient;
 import com.juns.health.net.loopj.android.http.RequestParams;
-import com.juns.wechat.App;
+import com.juns.wechat.ActivityControler;
 import com.juns.wechat.Constants;
 import com.juns.wechat.GloableParams;
 import com.juns.wechat.bean.User;
@@ -79,7 +79,7 @@ public class UserUtils {
 		EMClient.getInstance().logout(true);// 退出环信聊天
 		Utils.RemoveValue(context, Constants.LoginState);
 		Utils.RemoveValue(context, Constants.UserInfo);
-		App.getInstance2().exit();
+		ActivityControler.getInstance().exitApp();
 	}
 
 	public static void initUserInfo(final Context context,

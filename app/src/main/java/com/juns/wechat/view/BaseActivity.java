@@ -1,6 +1,7 @@
 package com.juns.wechat.view;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
@@ -10,27 +11,34 @@ import android.widget.TextView;
 import com.juns.wechat.ActivityControler;
 import com.juns.wechat.R;
 import com.juns.wechat.common.Utils;
-import com.juns.wechat.dialog.FlippingLoadingDialog;
 import com.juns.wechat.net.NetClient;
 
 import org.apache.http.message.BasicNameValuePair;
 
-public abstract class BaseActivity extends Activity implements View.OnClickListener{
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class BaseActivity extends Activity implements View.OnClickListener{
 	protected Activity context;
 	protected NetClient netClient;
-	protected FlippingLoadingDialog mLoadingDialog;
+	private ProgressDialog mProgressDialog;
+
+	private static final int TIME_OUT = 20 * 1000;
+	private Timer mTimer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView();
 		context = this;
-		ActivityControler.getInstance().addActivity(this);
 		netClient = new NetClient(this);
+		ActivityControler.getInstance().addActivity(this);
 		initView();
 		initData();
 		initControl();
 		setListener();
 	}
+
 
 	@Override
 	protected void onResume() {
@@ -39,6 +47,8 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
 
 	public void onPause() {
 		super.onPause();
+
+		dismissProgressDialog();
 	}
 
 	public void setWeChatTitle(String title){
@@ -60,6 +70,51 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
 		}
 	}
 
+	public void showProgressDialog(String message){
+		if (mProgressDialog == null){
+			mProgressDialog = new ProgressDialog(this);
+		}
+
+		mProgressDialog.setMessage(message);
+		mProgressDialog.setCancelable(false);
+		mProgressDialog.setCanceledOnTouchOutside(false);
+		mProgressDialog.show();
+
+		startCountTimeOut();
+	}
+
+	public void dismissProgressDialog(){
+		if (mProgressDialog != null && mProgressDialog.isShowing()){
+			mProgressDialog.dismiss();
+			mProgressDialog = null;
+
+			if (mTimer != null){
+				mTimer.cancel();
+				mTimer = null;
+			}
+		}
+	}
+
+	private void startCountTimeOut(){
+		mTimer = new Timer();
+		mTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				dismissProgressDialog();
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Utils.showShortToast(context,"请求超时，请重试！");
+						mTimer.cancel();
+						mTimer = null;
+					}
+				});
+			}
+		},TIME_OUT);
+	}
+
+
+
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()){
@@ -78,24 +133,29 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
 	}
 
 	/**
+	 * 设置布局
+	 */
+	protected void setContentView(){}
+
+	/**
 	 * 绑定控件id
 	 */
-	protected abstract void initControl();
+	protected void initControl(){}
 
 	/**
 	 * 初始化控件
 	 */
-	protected abstract void initView();
+	protected void initView(){}
 
 	/**
 	 * 初始化数据
 	 */
-	protected abstract void initData();
+	protected void initData(){}
 
 	/**
 	 * 设置监听
 	 */
-	protected abstract void setListener();
+	protected void setListener(){}
 
 	/**
 	 * 打开 Activity
@@ -125,9 +185,4 @@ public abstract class BaseActivity extends Activity implements View.OnClickListe
 		return Utils.isNetworkAvailable(context);
 	}
 
-	public FlippingLoadingDialog getLoadingDialog(String msg) {
-		if (mLoadingDialog == null)
-			mLoadingDialog = new FlippingLoadingDialog(this, msg);
-		return mLoadingDialog;
-	}
 }

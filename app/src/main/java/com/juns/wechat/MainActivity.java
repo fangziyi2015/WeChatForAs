@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hyphenate.EMConnectionListener;
+import com.hyphenate.EMContactListener;
 import com.hyphenate.EMError;
 import com.hyphenate.EMGroupChangeListener;
 import com.hyphenate.chat.EMClient;
@@ -29,11 +30,13 @@ import com.hyphenate.chat.EMMucSharedFile;
 import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.util.EMLog;
 import com.hyphenate.util.NetUtils;
+import com.juns.wechat.bean.Contact;
 import com.juns.wechat.bean.InviteMessage;
 import com.juns.wechat.bean.InviteMessage.InviteMesageStatus;
 import com.juns.wechat.bean.User;
 import com.juns.wechat.chat.ChatActivity;
 import com.juns.wechat.common.Utils;
+import com.juns.wechat.db.DataBaseOpenHelper;
 import com.juns.wechat.dialog.TitleMenu.ActionItem;
 import com.juns.wechat.dialog.TitleMenu.TitlePopup;
 import com.juns.wechat.dialog.TitleMenu.TitlePopup.OnItemOnClickListener;
@@ -79,7 +82,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		App.getInstance2().addActivity(this);
+		ActivityControler.getInstance().addActivity(this);
 		findViewById();
 		initViews();
 		initTabView();
@@ -87,6 +90,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		setOnListener();
 		initPopWindow();
 		initReceiver();
+		
+//		Intent intent = new Intent(MainActivity.this, ContactServer.class);
+//		startService(intent);
+		Log.d(TAG, "onCreate: ");
 	}
 
 	private void initTabView() {
@@ -233,6 +240,54 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private void setOnListener() {
 		img_right.setOnClickListener(this);
 
+		EMClient.getInstance().contactManager().setContactListener(new MyEMContactListener());
+
+	}
+
+	class MyEMContactListener implements EMContactListener {
+
+		@Override
+		public void onContactInvited(String username, String reason) {
+			//收到好友邀请
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Utils.showShortToast(MainActivity.this,"收到好友添加请求！");
+				}
+			});
+
+			Log.d(TAG, "onContactInvited: 收到好友添加请求");
+			DataBaseOpenHelper helper = new DataBaseOpenHelper(MainActivity.this,1);
+			Contact contact = new Contact(username,reason);
+			helper.addContact(contact);
+		}
+
+		@Override
+		public void onFriendRequestAccepted(String username) {
+			//好友请求被同意
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Utils.showShortToast(MainActivity.this,"对方已同意了你的好友请求！");
+				}
+			});
+		}
+
+		@Override
+		public void onFriendRequestDeclined(String username) {
+			//好友请求被拒绝
+		}
+
+		@Override
+		public void onContactDeleted(String username) {
+			//被删除时回调此方法
+		}
+
+
+		@Override
+		public void onContactAdded(String username) {
+			//增加了联系人时回调此方法
+		}
 	}
 
 	private int keyBackClickCount = 0;
@@ -253,7 +308,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 				break;
 			case 1:
 				EMClient.getInstance().logout(true);// 退出环信聊天
-				App.getInstance2().exit();
+				ActivityControler.getInstance().exitApp();
 				finish();
 				overridePendingTransition(R.anim.push_up_in, R.anim.push_up_out);
 				break;
@@ -700,5 +755,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			unreaMsgdLabel.setVisibility(View.INVISIBLE);
 		}
 	}
+
 
 }

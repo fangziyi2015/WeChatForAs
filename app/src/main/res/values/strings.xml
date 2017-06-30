@@ -27,6 +27,8 @@
     <string name="search">搜索</string>
     <string name="countries_and_areas">国家和地区</string>
     <string name="password">密码</string>
+    <string name="illegal_user_name">用户名不合法</string>
+    <string name="user_already_in_contactlist">此用户已是你好友(被拉黑状态)，从黑名单列表中移出即可</string>
 
     <string name="action_settings">Settings</string>
 

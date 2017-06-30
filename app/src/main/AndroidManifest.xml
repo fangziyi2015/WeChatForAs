@@ -48,6 +48,8 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name="com.juns.wechat.App"
         android:allowBackup="true"
@@ -149,6 +151,7 @@
         </activity>
 
         <service android:name=".view.UpdateService"></service>
+        <service android:name=".view.server.ContactServer"/>
         <!-- 朋友圈分享 -->
         <activity
             android:name=".view.activity.ShareActivity"

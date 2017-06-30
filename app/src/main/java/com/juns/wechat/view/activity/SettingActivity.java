@@ -6,7 +6,7 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.hyphenate.chat.EMClient;
-import com.juns.wechat.App;
+import com.juns.wechat.ActivityControler;
 import com.juns.wechat.Constants;
 import com.juns.wechat.R;
 import com.juns.wechat.common.Utils;
@@ -76,7 +76,7 @@ public class SettingActivity extends BaseActivity implements OnClickListener {
 			Utils.RemoveValue(context, Constants.UserInfo);
 			Utils.RemoveValue(context, Constants.NAME);
 			Utils.RemoveValue(context, Constants.PWD);
-			App.getInstance2().exit();
+			ActivityControler.getInstance().exitApp();
 			Utils.openActivity(this, LoginActivity.class);
 			break;
 		default:

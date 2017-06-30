@@ -79,14 +79,14 @@ public class EditUserNameActivity extends BaseActivity implements
 		RequestParams params = new RequestParams();
 		params.put("username", name);
 		params.put("telphone", telphone);
-		getLoadingDialog("正在加载...  ").show();
+		showProgressDialog("正在加载...");
 		netClient.post(Constants.UpdateInfoURL, params, new BaseJsonRes() {
 
 			@Override
 			public void onMySuccess(String data) {
 				Utils.putValue(EditUserNameActivity.this, Constants.UserInfo,
 						data);
-				getLoadingDialog("正在加载").dismiss();
+				showProgressDialog("正在加载...");
 				Intent intent = new Intent(EditUserNameActivity.this,
 						MainActivity.class);
 				startActivity(intent);
@@ -96,7 +96,7 @@ public class EditUserNameActivity extends BaseActivity implements
 
 			@Override
 			public void onMyFailure() {
-				getLoadingDialog("正在登录").dismiss();
+				dismissProgressDialog();
 			}
 		});
 	}

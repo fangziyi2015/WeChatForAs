@@ -1,42 +1,33 @@
 package com.juns.wechat;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Application;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.text.TextUtils;
 
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
-import com.juns.wechat.chat.VoiceCallActivity;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public class App extends Application {
 
 	private static Context _context;
 
+	public static String currentUserNick = "";
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		_context = getApplicationContext();
-//		initEMChat();
-//		EMChat.getInstance().init(_context);
-//		EMChat.getInstance().setDebugMode(true);
-//		EMChat.getInstance().setAutoLogin(true);
-//		EMChatManager.getInstance().getChatOptions().setUseRoster(true);
-//		FrontiaApplication.initFrontiaApplication(this);
-		// CrashHandler crashHandler = CrashHandler.getInstance();// 全局异常捕捉
-		// crashHandler.init(_context);
 
+		CrashHandler crashHandler = CrashHandler.getInstance();// 全局异常捕捉
+		crashHandler.init(_context);
 
 		EMOptions options = new EMOptions();
 		// 	默认添加好友时，是不需要验证的，改成需要验证
@@ -49,75 +40,6 @@ public class App extends Application {
 
 	public static Context getContext(){
 		return _context;
-	}
-
-//	private void initEMChat() {
-//		int pid = android.os.Process.myPid();
-//		String processAppName = getAppName(pid);
-//		if (processAppName == null
-//				|| !processAppName.equalsIgnoreCase("com.juns.wechat")) {
-//			return;
-//		}
-//		EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-//		// 获取到EMChatOptions对象
-//		// 设置自定义的文字提示
-//		options.setNotifyText(new OnMessageNotifyListener() {
-//
-//			@Override
-//			public String onNewMessageNotify(EMMessage message) {
-//				return "你的好友发来了一条消息哦";
-//			}
-//
-//			@Override
-//			public String onLatestMessageNotify(EMMessage message,
-//					int fromUsersNum, int messageNum) {
-//				return fromUsersNum + "个好友，发来了" + messageNum + "条消息";
-//			}
-//
-//			@Override
-//			public String onSetNotificationTitle(EMMessage arg0) {
-//				return null;
-//			}
-//
-//			@Override
-//			public int onSetSmallIcon(EMMessage arg0) {
-//				return 0;
-//			}
-//		});
-//		options.setOnNotificationClickListener(new OnNotificationClickListener() {
-//
-//			@Override
-//			public Intent onNotificationClick(EMMessage message) {
-//				Intent intent = new Intent(_context, MainActivity.class);
-//				ChatType chatType = message.getChatType();
-//				if (chatType == ChatType.Chat) { // 单聊信息
-//					intent.putExtra("userId", message.getFrom());
-//					intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-//				} else { // 群聊信息
-//					// message.getTo()为群聊id
-//					intent.putExtra("groupId", message.getTo());
-//					intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-//				}
-//				return intent;
-//			}
-//		});
-//		// IntentFilter callFilter = new
-//		// IntentFilter(EMChatManager.getInstance()
-//		// .getIncomingCallBroadcastAction());
-//		// registerReceiver(new CallReceiver(), callFilter);
-//	}
-
-	private class CallReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// 拨打方username
-			String from = intent.getStringExtra("from");
-			// call type
-			String type = intent.getStringExtra("type");
-			startActivity(new Intent(_context, VoiceCallActivity.class)
-					.putExtra("username", from).putExtra("isComingCall", true));
-		}
 	}
 
 	private String getAppName(int pID) {
@@ -159,8 +81,6 @@ public class App extends Application {
 		return _context;
 	}
 
-	// 运用list来保存们每一个activity是关键
-	private List<Activity> mList = new LinkedList<Activity>();
 	private static App instance;
 
 	// 构造方法
@@ -170,25 +90,6 @@ public class App extends Application {
 			instance = new App();
 		}
 		return instance;
-	}
-
-	// add Activity
-	public void addActivity(Activity activity) {
-		mList.add(activity);
-	}
-
-	// 关闭每一个list内的activity
-	public void exit() {
-		try {
-			for (Activity activity : mList) {
-				if (activity != null)
-					activity.finish();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			System.exit(0);
-		}
 	}
 
 	public static String getHJYCacheDir() {

@@ -243,9 +243,9 @@ public class AddGroupChatActivity extends BaseActivity implements
 			overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 		} else {
 			if (isCreatingNewGroup) {
-				getLoadingDialog("正在创建群聊...").show();
+				showProgressDialog("正在创建群聊...");
 			} else {
-				getLoadingDialog("正在加人...").show();
+				showProgressDialog("正在加人...");
 			}
 			creatNewGroup(addList);// 创建群组
 		}
@@ -525,7 +525,7 @@ public class AddGroupChatActivity extends BaseActivity implements
 							public void run() {
 								Utils.showLongToast(AddGroupChatActivity.this,
 										"创建失败");
-								getLoadingDialog("正在创建群聊...").dismiss();
+								dismissProgressDialog();
 							}
 						});
 						e.printStackTrace();
@@ -556,7 +556,7 @@ public class AddGroupChatActivity extends BaseActivity implements
 				intent.putExtra(Constants.TYPE, ChatActivity.CHATTYPE_GROUP);
 				intent.putExtra(Constants.GROUP_ID, groupId);
 				startActivity(intent);
-				getLoadingDialog("正在创建群聊...").dismiss();
+				dismissProgressDialog();
 				finish();
 			}
 

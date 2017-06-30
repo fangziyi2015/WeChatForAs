@@ -1,13 +1,13 @@
 package com.juns.wechat;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+
+import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * @author juns create time： 2013-8-13 全局异常处理
@@ -49,7 +49,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 												mContext.getPackageName());
 								i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 								mContext.startActivity(i);
-								App.getInstance2().exit();
+								ActivityControler.getInstance().exitApp();
 							}
 						}).setNegativeButton("取消", null).show();
 			}

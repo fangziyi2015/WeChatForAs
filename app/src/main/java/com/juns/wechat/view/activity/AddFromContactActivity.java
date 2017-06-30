@@ -1,7 +1,5 @@
 package com.juns.wechat.view.activity;
 
-import java.util.List;
-
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,6 +16,8 @@ import com.juns.wechat.bean.User;
 import com.juns.wechat.common.Utils;
 import com.juns.wechat.net.BaseJsonRes;
 import com.juns.wechat.view.BaseActivity;
+
+import java.util.List;
 
 //从通讯录添加好友
 public class AddFromContactActivity extends BaseActivity implements
@@ -43,7 +43,7 @@ public class AddFromContactActivity extends BaseActivity implements
 
 	@Override
 	protected void initView() {
-		getLoadingDialog("正在获取联系人").show();
+		showProgressDialog("正在获取联系人...");
 		String str_contact = Utils.getValue(this, Constants.ContactMsg);
 		RequestParams params = new RequestParams();
 		params.put("userlist", str_contact);
@@ -56,13 +56,13 @@ public class AddFromContactActivity extends BaseActivity implements
 								.parseArray(data, User.class);
 						mlistview.setAdapter(new FromContactAdapter(
 								AddFromContactActivity.this, UserInfos));
-						getLoadingDialog("正在获取联系人").dismiss();
+						showProgressDialog("正在获取联系人...");
 					}
 
 					@Override
 					public void onMyFailure() {
 						// TODO Auto-generated method stub
-						getLoadingDialog("正在获取联系人").dismiss();
+						dismissProgressDialog();
 					}
 				});
 	}

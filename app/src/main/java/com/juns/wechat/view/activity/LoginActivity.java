@@ -1,10 +1,6 @@
 package com.juns.wechat.view.activity;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,17 +9,17 @@ import android.widget.EditText;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
-import com.juns.health.net.loopj.android.http.RequestParams;
+import com.juns.wechat.App;
 import com.juns.wechat.Constants;
 import com.juns.wechat.MainActivity;
 import com.juns.wechat.R;
-import com.juns.wechat.common.DES;
 import com.juns.wechat.common.Utils;
-import com.juns.wechat.net.BaseJsonRes;
 import com.juns.wechat.view.BaseActivity;
 import com.juns.wechat.zxing.WeChatHelper;
 
 import org.apache.http.message.BasicNameValuePair;
+
+import static com.juns.wechat.chat.utils.CommonUtils.isNetWorkConnected;
 
 //登陆
 public class LoginActivity extends BaseActivity implements OnClickListener {
@@ -31,22 +27,16 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 	private EditText et_username, et_password;
 
 	private boolean isAutoLogin = false;
+	private static final String TAG = "LoginActivity";
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void setContentView() {
 		if (WeChatHelper.getInstance().isLoggedIn()) {
 			isAutoLogin = true;
-			openActivity(LoginActivity.this,MainActivity.class);
+			openActivity(LoginActivity.this, MainActivity.class);
 			return;
 		}
 		setContentView(R.layout.activity_login);
-	}
-
-	@Override
-	protected void initControl() {
-
-
 	}
 
 	@Override
@@ -54,13 +44,9 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 		btn_login = (Button) findViewById(R.id.btn_login);
 		btn_login.setEnabled(true);
 		btn_register = (Button) findViewById(R.id.btn_qtlogin);
-		et_username = (EditText) findViewById(R.id.et_usertel);
-		et_password = (EditText) findViewById(R.id.et_password);
+		et_username = (EditText) findViewById(R.id.et_username);
+		et_password = (EditText) findViewById(R.id.et_confirm_password);
 		setWeChatTitle("登陆");
-	}
-
-	@Override
-	protected void initData() {
 	}
 
 	@Override
@@ -70,148 +56,104 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 		findViewById(R.id.tv_wenti).setOnClickListener(this);
 	}
 
+
 	@Override
-	public void onClick(View v) {
+	public void myOnClick(View v, int id) {
+		super.myOnClick(v, id);
 		switch (v.getId()) {
-		case R.id.tv_wenti:
-			Utils.openActivity(LoginActivity.this, WebViewActivity.class,
-					new BasicNameValuePair(Constants.Title, "帮助"),
-					new BasicNameValuePair(Constants.URL,
-							"http://weixin.qq.com/"));
-			break;
-		case R.id.btn_qtlogin:
-			openActivity(LoginActivity.this,RegisterActivity.class);
-			break;
-		case R.id.btn_login:
-			login();
-			break;
-		default:
-			break;
+			case R.id.tv_wenti:
+				Utils.openActivity(LoginActivity.this, WebViewActivity.class,
+						new BasicNameValuePair(Constants.Title, "帮助"),
+						new BasicNameValuePair(Constants.URL,
+								"http://weixin.qq.com/"));
+				break;
+			case R.id.btn_qtlogin:
+				openActivity(LoginActivity.this,RegisterActivity.class);
+				break;
+			case R.id.btn_login:
+				login();
+				break;
+			default:
+				break;
 		}
 	}
 
 	// 登陆
 	private void login() {
-
-	}
-
-	private void getLogin() {
-		String userName = et_username.getText().toString().trim();
-		String password = et_password.getText().toString().trim();
-		getLoadingDialog("正在登录...").show();
-		//getLogin(userName, password);
-
-//		Intent intent = new Intent(LoginActivity.this,
-//				MainActivity.class);
-//		openActivity(intent);
-
-		// 登陆
-		getChatserive(userName,password);
-	}
-
-	private void getLogin(final String userName, final String password) {
-		if (!TextUtils.isEmpty(userName) && !TextUtils.isEmpty(password)) {
-			RequestParams params = new RequestParams();
-			params.put("username", userName);
-			params.put("password", DES.md5Pwd(password));
-			getLoadingDialog("正在登录...  ").show();
-			netClient.post(Constants.Login_URL, params, new BaseJsonRes() {
-
-				@Override
-				public void onMySuccess(String data) {
-					Utils.putValue(LoginActivity.this, Constants.UserInfo, data);
-					Utils.putBooleanValue(LoginActivity.this,
-							Constants.LoginState, true);
-					Utils.putValue(LoginActivity.this, Constants.NAME, userName);
-					Utils.putValue(LoginActivity.this, Constants.PWD,
-							DES.md5Pwd(password));
-					getChatserive(userName, DES.md5Pwd(password));
-				}
-
-				@Override
-				public void onMyFailure() {
-					getLoadingDialog("正在登录").dismiss();
-				}
-			});
-		} else {
-			Utils.showLongToast(LoginActivity.this, "请填写账号或密码！");
+		if (!isNetWorkConnected(this)) {
+			Utils.showShortToast(this,getResources().getString(R.string.network_isnot_available));
+			return;
 		}
-	}
 
-	private void getChatserive(final String userName, final String password) {
-		EMClient.getInstance().login(userName, password, new EMCallBack() {// 回调
+		final String userName = et_username.getText().toString().trim();
+		final String userPwd = et_password.getText().toString().trim();
+
+		if (TextUtils.isEmpty(userName)){
+			Utils.showShortToast(this,"账号不能为空！");
+			return;
+		}
+
+		if (TextUtils.isEmpty(userPwd)){
+			Utils.showShortToast(this,"密码不能为空！");
+			return;
+		}
+
+		showProgressDialog("正在登陆中...");
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				EMClient.getInstance().login(userName, userPwd, new EMCallBack() {
 					@Override
 					public void onSuccess() {
+						// 加载所有群组和会话
+						EMClient.getInstance().groupManager().loadAllGroups();
+						EMClient.getInstance().chatManager().loadAllConversations();
+
+						// 更新当前接入点的昵称
+						boolean updatenick = EMClient.getInstance().pushManager().updatePushNickname(
+								App.currentUserNick.trim());
+						if (!updatenick) {
+							Log.e("LoginActivity", "update current user nick fail");
+						}
+
+
 						runOnUiThread(new Runnable() {
+							@Override
 							public void run() {
-								Utils.putBooleanValue(LoginActivity.this,
-										Constants.LoginState, true);
-								Utils.putValue(LoginActivity.this,
-										Constants.User_ID, userName);
-								Utils.putValue(LoginActivity.this,
-										Constants.PWD, password);
-								Log.d("main", "登陆聊天服务器成功！");
-								EMClient.getInstance().groupManager().loadAllGroups();
-								EMClient.getInstance().chatManager().loadAllConversations();
-								getLoadingDialog("正在登录...").dismiss();
-								Intent intent = new Intent(LoginActivity.this,
-										MainActivity.class);
-								startActivity(intent);
-								overridePendingTransition(R.anim.push_up_in,
-										R.anim.push_up_out);
-								finish();
+								Utils.showShortToast(LoginActivity.this,"登陆服务器成功！");
+								if (!LoginActivity.this.isFinishing()){
+									dismissProgressDialog();
+								}
+							}
+						});
+
+						openActivity(LoginActivity.this,MainActivity.class);
+						finish(LoginActivity.this);
+					}
+
+					@Override
+					public void onError(int i, String s) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								Utils.showShortToast(LoginActivity.this,"登陆失败，请重新登陆！");
+								if (!LoginActivity.this.isFinishing()){
+									dismissProgressDialog();
+								}
 							}
 						});
 					}
 
 					@Override
-					public void onProgress(int progress, String status) {
-
-					}
-
-					@Override
-					public void onError(int code, String message) {
-						Log.d("main", "登陆聊天服务器失败！");
-						runOnUiThread(new Runnable() {
-							public void run() {
-								getLoadingDialog("正在登录...").dismiss();
-								Utils.showLongToast(LoginActivity.this, "登陆失败！");
-							}
-						});
+					public void onProgress(int i, String s) {
+						Log.d(TAG, "onProgress: ");
 					}
 				});
-	}
-
-	// EditText监听器
-	class TextChange implements TextWatcher {
-
-		@Override
-		public void afterTextChanged(Editable arg0) {
-
-		}
-
-		@Override
-		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-				int arg3) {
-
-		}
-
-		@Override
-		public void onTextChanged(CharSequence cs, int start, int before,
-				int count) {
-			boolean Sign2 = et_username.getText().length() > 0;
-			boolean Sign3 = et_password.getText().length() > 4;
-			if (Sign2 & Sign3) {
-				btn_login.setBackgroundDrawable(getResources().getDrawable(
-						R.drawable.btn_bg_green));
-				btn_login.setEnabled(true);
-			} else {
-				btn_login.setBackgroundDrawable(getResources().getDrawable(
-						R.drawable.btn_enable_green));
-				btn_login.setTextColor(0xFFD0EFC6);
-				btn_login.setEnabled(false);
 			}
-		}
+		}).start();
+
 	}
+
 
 }

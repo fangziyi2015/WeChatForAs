@@ -41,4 +41,14 @@ public class ActivityControler {
         }
     }
 
+    public void exitApp(){
+        if (activities != null && activities.size() > 0){
+            for (Activity a:activities) {
+                if (!a.isFinishing()) {
+                    a.finish();
+                }
+            }
+        }
+    }
+
 }

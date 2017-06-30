@@ -1,7 +1,5 @@
 package com.juns.wechat.net;
 
-import java.io.File;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,6 +23,8 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
+
+import java.io.File;
 
 public class NetClient {
 
@@ -105,7 +105,6 @@ public class NetClient {
 	/**
 	 * 根据url获取小图片 并自动设置到imageview中 获取的图片保存到内存(切勿加载大图)
 	 * 
-	 * @param img
 	 * @param url
 	 */
 	public static void getIconBitmap(ImageView view, String url) {
@@ -115,7 +114,6 @@ public class NetClient {
 	/**
 	 * 根据url获取大图片 并自动设置到imageview中 获取的图片不保存到内存
 	 * 
-	 * @param img
 	 * @param url
 	 */
 	public static void getBinnerBitmap(ImageView imageView, String url) {
@@ -133,8 +131,6 @@ public class NetClient {
 	/**
 	 * 根据url获取大图片 并自动设置到imageview中 获取的图片不保存到内存
 	 * 
-	 * @param img
-	 * @param url
 	 */
 	public static void getHalfHeightBitmap(ImageView imageView, String uri,
 			ImageLoadingListener lister) {

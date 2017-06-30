@@ -1,6 +1,5 @@
 package com.juns.wechat;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.AlphaAnimation;
 import android.widget.RelativeLayout;
@@ -20,15 +19,8 @@ public class SplashActivity extends BaseActivity {
 	private static final String TAG = "SplashActivity";
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void setContentView() {
 		setContentView(R.layout.activity_splash);
-
-	}
-
-	@Override
-	protected void initControl() {
-
 	}
 
 	@Override
@@ -40,23 +32,13 @@ public class SplashActivity extends BaseActivity {
 	}
 
 	@Override
-	protected void initData() {
-
-	}
-
-
-	@Override
-	protected void setListener() {
-
-	}
-
-	@Override
 	protected void onStart() {
 		super.onStart();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				if (WeChatHelper.getInstance().isLoggedIn()){
+					Log.i(TAG, "run: 登陆");
 					long start = System.currentTimeMillis();
 					EMClient.getInstance().chatManager().loadAllConversations();
 					EMClient.getInstance().groupManager().loadAllGroups();
@@ -69,16 +51,18 @@ public class SplashActivity extends BaseActivity {
 							e.printStackTrace();
 						}
 					}
+//
 					String topActivityName = EasyUtils.getTopActivityName(EMClient.getInstance().getContext());
 					if (topActivityName != null && (topActivityName.equals(VideoCallActivity.class.getName()) || topActivityName.equals(VoiceCallActivity.class.getName()))) {
 						// nop
 						// avoid main screen overlap Calling Activity
+						Log.i(TAG, "avoid main screen overlap Calling Activity");
 					} else {
 						//enter main screen
 						Utils.openActivity(SplashActivity.this,MainActivity.class);
-						finish();
+						Log.i(TAG, "run: ===================");
 					}
-					finish();
+
 				}else {
 					try {
 						Thread.sleep(sleepTime);
@@ -87,7 +71,7 @@ public class SplashActivity extends BaseActivity {
 					}
 
 					Utils.openActivity(SplashActivity.this,LoginActivity.class);
-					finish();
+					finish(SplashActivity.this);
 				}
 			}
 		}).start();
